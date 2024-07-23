@@ -1,19 +1,16 @@
 # iron-floc-ua-2024
-Troy Spencer
-Underwood & Associates Internship 2024
+Troy Spencer  
+Underwood & Associates Internship 2024  
 Iron Floc, Effects on Biodiversity
 
 
-Site Names:
-
-Jabez 3 = j3
-Howard’s Branch = hb
-Cattail Creek; restored = ccr
-
-Jabez Main Branch = j1
-Arthur’s Run = ar
+Site Names:  
+Jabez 3 = j3  
+Howard’s Branch = hb  
+Cattail Creek; restored = ccr  
+Jabez Main Branch = j1  
+Arthur’s Run = ar  
 Cattail Creek; unrestored = cc
-
 
 
 site_name, transect_number, and plot_location are all text inputs, ferrous_iron, d_o, temp, conductivity, and turbidity are all numeric inputs.
@@ -42,10 +39,6 @@ macro_abundance = the total number of macroinvertebrates present at the given lo
 macro_diversity = the number of different species of macroinvertebrates identified at the present location
 
 taxa = the narrowest relevant taxonomical classification for each invertebrate
-
-weight = the weight of the individual macroinvertebrate in miligrams, as determined by {ENTER_CHART_NAME_HERE}
-
-length = the length of the individual macroinvertebrate in milimeters
 
 condition = the stream location is either restored or unrestored
 
