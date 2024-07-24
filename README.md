@@ -13,7 +13,7 @@ Arthur’s Run = ar
 Cattail Creek; unrestored = cc
 
 
-site_name, transect_number, and plot_location are all text inputs, ferrous_iron, d_o, temp, conductivity, and turbidity are all numeric inputs.
+site_name, transect_number, plot_location, and flow rate are all text inputs, ferrous_iron, d_o, d_o%, temp, conductivity, turbidity, taxa, and sample are all numeric inputs.
 
 site_name = the name of the project site or unrestored site analogue
 
@@ -33,10 +33,6 @@ conductivity = the conductivity of the water at the given location
 
 turbidity = the turbidity of the water at the given location
 *any reading of 120.1 indicates that the turbidity was greater than 120, which is the maximum length of the turbidity tube used
-
-macro_abundance = the total number of macroinvertebrates present at the given location
-
-macro_diversity = the number of different species of macroinvertebrates identified at the present location
 
 taxa = the narrowest relevant taxonomical classification for each invertebrate
 
