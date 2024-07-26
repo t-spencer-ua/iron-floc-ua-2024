@@ -20,9 +20,9 @@ library(lubridate)
 ```
 
 
-## Analysis
+## Datasets
 
-This is the beginning of the data analysis. Reading in the data sets.
+Reading in the data sets.
 
 ```{r}
 taxa <- read_excel("~/Desktop/Iron Floc UA Project/iron_floc_impact_on_macroinvertebrate_biodiversity_taxa.xlsx")
@@ -30,7 +30,21 @@ taxa_sim <- read_excel("~/Desktop/Iron Floc UA Project/iron_floc_impact_on_macro
     sheet = "simulated data DO NOT USE")
 water_quality <- read_excel("~/Desktop/Iron Floc UA Project/iron_floc_impact_on_macroinvertebrate_biodiversity_water_quality.xlsx", 
     sheet = "data")
+water_sim <- read_excel("~/Desktop/Iron Floc UA Project/iron_floc_impact_on_macroinvertebrate_biodiversity_water_quality.xlsx", 
+    sheet = "simulate data DO NOT USE")
 ```
+
+
+Taking a look at the formats of the data:
+
+```{r}
+str(taxa)
+str(taxa_sim)
+str(water_quality)
+
+```
+
+
 
 ## Graphing
 
@@ -41,6 +55,66 @@ ggplot(water_quality, aes(x=d_o, y=ferrous_iron))+
   geom_point(color="purple")+
   labs(x="Dissolved Oxygen", y= "Ferrous Iron", title="Dissolved Oxygen and Iron")+
   theme_classic()
+```
+
+## Bar Graph for iron by plot location
+
+```{r}
+ggplot(water_quality, aes(x=factor(plot_location), y=ferrous_iron, fill=factor(transect_number)))+
+  geom_col(position="dodge")
+```
+
+## Question 1
+
+Does stream restoration increase the presence of iron flocculate by creating low-flow, acidic, and high iron water conditions compared to unrestored streams?
+
+Plot the ferrous iron, dissolved oxygen mg/l, dissolved oxygen percentage, conductivity, temperature, and turbidity by restored/unrestored. Dissolved oxygens can share a graph.
+```{r}
+ggplot(water_sim, aes(x=factor(condition), y=factor(ferrous_iron), fill=factor(site_name)))+
+  geom_col(position="dodge")
+
+ggplot(water_sim, aes(x=factor(analogue), y=factor(percent_cover), fill=factor(site_name)))+
+  geom_col(position="dodge")
+```
+
+## Question 2
+
+How does iron flocculate affect the diversity and abundance of macroinvertebrates?
+
+Create a biodiversity object (number of species divided by number of individuals). Plot number of species and number of individuals by percent cover and ferrous iron. Four graphs total.
+
+```{r}
+AR <- taxa_sim %>% filter(site_name=="AR")
+AR_diversity<-length(unique(AR$taxa))/nrow(AR)
+
+HB <- taxa_sim %>% filter(site_name=="HB")
+HB_diversity <- length(unique(HB$taxa))/nrow(HB)
+
+CC <- taxa_sim %>% filter(site_name=="CC")
+CC_diversity <- length(unique(CC$taxa))/nrow(CC)
+
+J1 <- taxa_sim %>% filter(site_name=="J1")
+J1_diversity <- length(unique(J1$taxa))/nrow(J1)
+
+J3 <- taxa_sim %>% filter(site_name=="J3")
+J3_diversity <- length(unique(J3$taxa))/nrow(J3)
+```
+
+## Question 3
+
+Does the effect of iron flocculate on the abundance and diversity of macroinvertebrates depend on if a stream has been restored?
+
+```{r}
 
 ```
+
+
+
+
+
+
+
+
+
+
 
