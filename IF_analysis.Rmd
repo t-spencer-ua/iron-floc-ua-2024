@@ -1,1 +1,46 @@
-#Analysis page for IF data
+---
+title: "IF_analysis"
+output:
+  html_document:
+    df_print: paged
+date: "2024-07-26"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Adding packages
+
+```{r}
+library(readxl)
+library(ggplot2)
+library(tidyverse)
+library(lubridate)
+```
+
+
+## Analysis
+
+This is the beginning of the data analysis. Reading in the data sets.
+
+```{r}
+taxa <- read_excel("~/Desktop/Iron Floc UA Project/iron_floc_impact_on_macroinvertebrate_biodiversity_taxa.xlsx")
+taxa_sim <- read_excel("~/Desktop/Iron Floc UA Project/iron_floc_impact_on_macroinvertebrate_biodiversity_taxa.xlsx", 
+    sheet = "simulated data DO NOT USE")
+water_quality <- read_excel("~/Desktop/Iron Floc UA Project/iron_floc_impact_on_macroinvertebrate_biodiversity_water_quality.xlsx", 
+    sheet = "data")
+```
+
+## Graphing
+
+Creating graphs.
+
+```{r}
+ggplot(water_quality, aes(x=d_o, y=ferrous_iron))+
+  geom_point(color="purple")+
+  labs(x="Dissolved Oxygen", y= "Ferrous Iron", title="Dissolved Oxygen and Iron")+
+  theme_classic()
+
+```
+
