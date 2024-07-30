@@ -1753,24 +1753,9 @@ ggplot(water_sim, aes(x=site_name, y=conductivity))+
 <h2>Question 2</h2>
 <p>How does iron flocculate affect the diversity and abundance of
 macroinvertebrates?</p>
-<p>Create a biodiversity object (number of species divided by number of
-individuals). Plot number of species and number of individuals by
-percent cover and ferrous iron. Four graphs total. A fifth graph can
-show the biodiversity number against percent cover/ferrous iron.</p>
-<pre class="r"><code>AR &lt;- taxa_sim %&gt;% filter(site_name==&quot;AR&quot;)
-AR_diversity&lt;-length(unique(AR$taxa))/nrow(AR)
-
-HB &lt;- taxa_sim %&gt;% filter(site_name==&quot;HB&quot;)
-HB_diversity &lt;- length(unique(HB$taxa))/nrow(HB)
-
-CC &lt;- taxa_sim %&gt;% filter(site_name==&quot;CC&quot;)
-CC_diversity &lt;- length(unique(CC$taxa))/nrow(CC)
-
-J1 &lt;- taxa_sim %&gt;% filter(site_name==&quot;J1&quot;)
-J1_diversity &lt;- length(unique(J1$taxa))/nrow(J1)
-
-J3 &lt;- taxa_sim %&gt;% filter(site_name==&quot;J3&quot;)
-J3_diversity &lt;- length(unique(J3$taxa))/nrow(J3)</code></pre>
+<p>Plot number of species and number of individuals by percent cover and
+ferrous iron. Four graphs total. A fifth graph can show the biodiversity
+number against percent cover/ferrous iron.</p>
 </div>
 <div id="question-3" class="section level2">
 <h2>Question 3</h2>

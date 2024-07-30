@@ -109,24 +109,9 @@ ggplot(water_sim, aes(x=site_name, y=flow_rate))+
 
 How does iron flocculate affect the diversity and abundance of macroinvertebrates?
 
-Create a biodiversity object (number of species divided by number of individuals). Plot number of species and number of individuals by percent cover and ferrous iron. Four graphs total. A fifth graph can show the biodiversity number against percent cover/ferrous iron.
+Plot number of species and number of individuals by percent cover and ferrous iron. Four graphs total. A fifth graph can show the biodiversity number against percent cover/ferrous iron.
 
 ```{r}
-AR <- taxa_sim %>% filter(site_name=="AR")
-AR_diversity<-length(unique(AR$taxa))/nrow(AR)
-
-HB <- taxa_sim %>% filter(site_name=="HB")
-HB_diversity <- length(unique(HB$taxa))/nrow(HB)
-
-CC <- taxa_sim %>% filter(site_name=="CC")
-CC_diversity <- length(unique(CC$taxa))/nrow(CC)
-
-J1 <- taxa_sim %>% filter(site_name=="J1")
-J1_diversity <- length(unique(J1$taxa))/nrow(J1)
-
-J3 <- taxa_sim %>% filter(site_name=="J3")
-J3_diversity <- length(unique(J3$taxa))/nrow(J3)
-
 
 ```
 
