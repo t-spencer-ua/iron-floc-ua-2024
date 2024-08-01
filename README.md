@@ -45,3 +45,7 @@ percent_cover = the average of three percent cover estimates as measured with a 
 sample = a yes or no value indicates whether the individual was in the original sample (yes) or collected from the vicinity and added to the sample manually (no)
 
 flow_rate = average amount of water passing through the system per second, as measured with the orange method in cubic meters per second (m^3/s)
+
+analogue = a numeric input or 1, 2, or 3 to group the sites with the site of the opposite condition that closest matches the geographical, hydrological, and land use conditions
+
+geo_order = a single column to show a collection of the transect_number and plot_location data , input of 1-9 in order of upstream-most site to downstream-most site

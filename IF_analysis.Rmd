@@ -10,6 +10,7 @@ date: "2024-07-26"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+
 ## Adding packages
 
 ```{r}
@@ -33,7 +34,7 @@ water_quality <- read_excel("~/Desktop/Iron Floc UA Project/iron_floc_impact_on_
 ```
 
 
-Taking a look at the formats of the data:
+## Taking a look at the formats of the data:
 
 ```{r}
 str(taxa)
@@ -41,7 +42,6 @@ str(taxa)
 str(water_quality)
 
 ```
-
 
 
 ## Graphing
@@ -55,24 +55,19 @@ ggplot(water_quality, aes(x=d_o, y=ferrous_iron))+
   theme_classic()
 ```
 
-## Bar Graph for iron by plot location
-
-```{r}
-ggplot(water_quality, aes(x=factor(plot_location), y=ferrous_iron, fill=factor(transect_number)))+
-  geom_col(position="dodge")
-```
 
 ## Question 1
 
 Does stream restoration increase the presence of iron flocculate by creating low-flow, acidic, and high iron water conditions compared to unrestored streams?
 
 Plot the ferrous iron, dissolved oxygen mg/l, dissolved oxygen percentage, conductivity, temperature, and turbidity by restored/unrestored. Dissolved oxygens can share a graph.
+
 ```{r}
 prcnt_cvr <- water_quality %>%
   group_by(site_name) %>%
   summarize(mean_cover=mean(as.numeric(percent_cover), na.rm = TRUE))
 
-ggplot(water_quality, aes(x=factor(condition), y=factor(ferrous_iron), fill=factor(site_name)))+
+ggplot(water_quality, aes(x=factor(analogue), y=factor(ferrous_iron), fill=factor(site_name)))+
   geom_col(position="dodge")
 
 ggplot(water_quality, aes(x=factor(analogue), y=factor(percent_cover), fill=factor(site_name)))+
@@ -100,7 +95,12 @@ ggplot(prcnt_cvr, aes(x=site_name, y=mean_cover))+
 
 ggplot(water_quality, aes(x=site_name, y=flow_rate))+
          geom_bar(stat="identity")
+
+ggplot(water_quality, aes(x=ferrous_iron, y=percent_cover))+
+  geom_bar(stat="identity")
+## remove na's, invert graph
 ```
+
 
 ## Question 2
 
@@ -111,6 +111,7 @@ Plot number of species and number of individuals by percent cover and ferrous ir
 ```{r}
 
 ```
+
 
 ## Question 3
 
@@ -147,10 +148,41 @@ ggplot(all_sites, aes(x=analogue, y=biodiversity, fill=reorder(factor(site_name)
 ```
 
 
+## Data Along Streams
 
+Testing using a scatterplot to show the water quality levels within a stream with the position on the X axis
 
+```{r}
+ggplot(water_quality, aes(x=geo_order, y=temp, color=site_name))+
+         geom_point()+
+  geom_line(aes(linetype=site_name))+
+  labs(x="Sequential Data along Streams", y="Temperature (C)", color="Site Names", linetype="Site Names")
 
+ggplot(water_quality, aes(x=geo_order, y=ferrous_iron, color=site_name))+
+         geom_point()+
+  geom_line(aes(linetype=site_name))+
+  labs(x="Sequential Data along Streams", y="Dissolved Ferrous Iron (ppm)", color="Site Names", linetype="Site Names")
 
+ggplot(water_quality, aes(x=geo_order, y=d_o, color=site_name))+
+         geom_point()+
+  geom_line(aes(linetype=site_name))+
+  labs(x="Sequential Data along Streams", y="Dissolved Oxygen (mg/L)", color="Site Names", linetype="Site Names")
+
+ggplot(water_quality, aes(x=geo_order, y=`d_o%`, color=site_name))+
+         geom_point()+
+  geom_line(aes(linetype=site_name))+
+  labs(x="Sequential Data along Streams", y="Dissolved Oxygen (%)", color="Site Names", linetype="Site Names")
+
+ggplot(water_quality, aes(x=geo_order, y=conductivity, color=site_name))+
+         geom_point()+
+  geom_line(aes(linetype=site_name))+
+  labs(x="Sequential Data along Streams", y="Conductivity (uS/cm)", color="Site Names", linetype="Site Names")
+
+ggplot(water_quality, aes(x=geo_order, y=turbidity, color=site_name))+
+         geom_point()+
+  geom_line(aes(linetype=site_name))+
+  labs(x="Sequential Data along Streams", y="Turbidity (cm)", color="Site Names", linetype="Site Names")
+```
 
 
 
