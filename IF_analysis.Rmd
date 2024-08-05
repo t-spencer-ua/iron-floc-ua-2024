@@ -10,6 +10,9 @@ date: "2024-07-26"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+#### IMPORTANT: FOR 120.1 TURBIDITY MAKE IT GO OFF-SCALE, AND MARK WITH A STAR
+
+Ask Amy about this. There may also still be a problem with the sum_sites cbind, but it may? be fixed?? double check that
 
 ## Adding packages
 
@@ -56,6 +59,26 @@ ggplot(water_quality, aes(x=d_o, y=ferrous_iron))+
 ```
 
 
+## Dataframes and objects
+
+Create the all_sites dataframe to summarize the site_name, analogue, number of species, number of individuals, biodiversity/species richness percent, and mean iron floc coverage percent.
+
+```{r}
+prcnt_cvr <- water_quality %>%
+  group_by(site_name) %>%
+  summarize(mean_cover=mean(as.numeric(percent_cover), na.rm = TRUE), flow=mean(as.numeric(flow_rate)))
+
+##this created all_sites, if you need to summarize the total number of unique/total number of entries
+all_sites <- taxa %>% group_by(site_name, analogue) %>%
+  ##select(site_name, taxa) %>% not necesary, try if there are errors
+  summarize(count_taxa=n_distinct(taxa), total=n()) %>%
+  mutate(biodiversity=count_taxa/total)
+##adds the biodiversity values
+
+sum_sites <- merge(prcnt_cvr, all_sites)
+```
+
+
 ## Question 1
 
 Does stream restoration increase the presence of iron flocculate by creating low-flow, acidic, and high iron water conditions compared to unrestored streams?
@@ -63,10 +86,6 @@ Does stream restoration increase the presence of iron flocculate by creating low
 Plot the ferrous iron, dissolved oxygen mg/l, dissolved oxygen percentage, conductivity, temperature, and turbidity by restored/unrestored. Dissolved oxygens can share a graph.
 
 ```{r}
-prcnt_cvr <- water_quality %>%
-  group_by(site_name) %>%
-  summarize(mean_cover=mean(as.numeric(percent_cover), na.rm = TRUE))
-
 ggplot(water_quality, aes(x=factor(analogue), y=factor(ferrous_iron), fill=factor(site_name)))+
   geom_col(position="dodge")
 
@@ -99,6 +118,9 @@ ggplot(water_quality, aes(x=site_name, y=flow_rate))+
 ggplot(water_quality, aes(x=ferrous_iron, y=percent_cover))+
   geom_bar(stat="identity")
 ## remove na's, invert graph
+
+ggplot(sum_sites, aes(x=as.numeric(flow), y=as.numeric(mean_cover)))+
+  geom_point()
 ```
 
 
@@ -109,7 +131,7 @@ How does iron flocculate affect the diversity and abundance of macroinvertebrate
 Plot number of species and number of individuals by percent cover and ferrous iron. Four graphs total. A fifth graph can show the biodiversity number against percent cover/ferrous iron.
 
 ```{r}
-
+##change the all_sites and prcnt_cvr to be just all_sites, specifically reqrite the prcnt_cvr create code so all_sites gets the piping instead of prcnt_cvr
 ```
 
 
@@ -120,12 +142,6 @@ Does the effect of iron flocculate on the abundance and diversity of macroinvert
 Plot the biodiversity, #of species, and #of individuals against site names, filled by condition
 
 ```{r}
-##this created all_sites, if you need to summarize the total number of unique/total number of entries
-all_sites <- taxa %>% group_by(site_name, analogue) %>%
-  ##select(site_name, taxa) %>% not necesary, try if there are errors
-  summarize(count_taxa=n_distinct(taxa), total=n()) %>%
-  mutate(biodiversity=count_taxa/total) ##adds the biodiversity values calculated in Q2, same result but much fewer steps as it doesn't need to create a distinct value and data point.
-
 ggplot(all_sites, aes(x=reorder(site_name, analogue), y=biodiversity, fill=factor(analogue)))+
   ## reorder tells ggplot i'm going to reorder, the 'biodiversity' tells it what column to reorder by
   geom_bar(stat="identity")+
@@ -184,6 +200,21 @@ ggplot(water_quality, aes(x=geo_order, y=turbidity, color=site_name))+
   labs(x="Sequential Data along Streams", y="Turbidity (cm)", color="Site Names", linetype="Site Names")
 ```
 
+## Scatterplots of WQ data plotted against eachother to identify trendlines
+
+how to remove nas? how to adjust scales? na.rm=TRUE doesn't work, the various scale commands also don't work
+
+```{r}
+ggplot(water_quality, aes(x=d_o, y=`d_o%`))+
+  geom_point()+
+  geom_smooth(method="lm")
+
+ggplot(water_quality, aes(x=ferrous_iron, y=percent_cover, na.rm=TRUE))+
+  geom_point()
+
+ggplot(water_quality, aes(x=conductivity, y=ferrous_iron))+
+  geom_point()
+```
 
 
 
