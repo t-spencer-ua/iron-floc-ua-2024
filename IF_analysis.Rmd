@@ -27,7 +27,7 @@ library(RColorBrewer)
 
 ## Datasets, Palettes
 
-Reading in the data sets, and set up colorblind-friendly color palettes
+Reading in the data sets, and set up colorblind-friendly color palette(s)
 
 ```{r}
 taxa <- read_excel("~/Desktop/Iron Floc UA Project/iron_floc_impact_on_macroinvertebrate_biodiversity_taxa.xlsx")
@@ -39,7 +39,9 @@ cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2",
 ```
 
 
-## Taking a look at the formats of the data:
+## Data Formats
+
+If you are getting errors and the syntax/et are correct, check what type of data the colum is, and run an as.DATATYPE if it's the wrong kind of data for what you're trying to do.
 
 ```{r}
 str(taxa)
@@ -48,26 +50,14 @@ str(water_quality)
 ```
 
 
-## Graphing
-
-Creating graphs.
-
-```{r}
-ggplot(water_quality, aes(x=d_o, y=ferrous_iron))+
-  geom_point(color="purple")+
-  labs(x="Dissolved Oxygen", y= "Ferrous Iron", title="Dissolved Oxygen and Iron")+
-  theme_classic()
-```
-
-
-## Dataframes and objects
+## Creating the Environment
 
 Create the all_sites dataframe to summarize the site_name, analogue, number of species, number of individuals, biodiversity/species richness percent, and mean iron floc coverage percent.
 
 ```{r}
 prcnt_cvr <- water_quality %>%
-  group_by(site_name) %>%
-  summarize(mean_cover=mean(as.numeric(percent_cover), na.rm = TRUE), flow=mean(as.numeric(flow_rate)))
+  group_by(site_name, condition) %>%
+  summarize(mean_cover=mean(as.numeric(percent_cover), na.rm = TRUE), flow=mean(as.numeric(flow_rate)), ferrous_iron=mean(as.numeric(ferrous_iron)))
 
 ##this created all_sites, if you need to summarize the total number of unique/total number of entries
 all_sites <- taxa %>% group_by(site_name, analogue) %>%
@@ -83,8 +73,12 @@ sum_sites <- merge(prcnt_cvr, all_sites)
 ## Question 1
 
 Does stream restoration increase the presence of iron flocculate by creating low-flow, acidic, and high iron water conditions compared to unrestored streams?
+-%cover
+-flow_rate
+-ferrous-iron
+x-condition
 
-Plot the ferrous iron, dissolved oxygen mg/l, dissolved oxygen percentage, conductivity, temperature, and turbidity by restored/unrestored. Dissolved oxygens can share a graph.
+The bar graphs are all simple water quality metrics plotted/graphed by their site names. These will either be removed or replaced with scatterplot graphs as I find out which answer Question 1 the most directly, and which are most interesting.
 
 ```{r}
 ggplot(water_quality, aes(x=factor(analogue), y=factor(ferrous_iron), fill=factor(site_name)))+
@@ -113,15 +107,30 @@ ggplot(water_quality, aes(x=site_name, y=turbidity))+
 ggplot(prcnt_cvr, aes(x=site_name, y=mean_cover))+
          geom_bar(stat="identity")
 
-ggplot(water_quality, aes(x=site_name, y=flow_rate))+
-         geom_bar(stat="identity")
+ggplot(water_quality, aes(x=conductivity, y=flow_rate))+
+  geom_point(aes(shape=as.character(condition), color=as.character(analogue)))+
+  geom_smooth(method="lm")+
+  labs(x="Conductivity", y="Flow Rate", color="Analogue Group", shape="Condition")
 
 ggplot(water_quality, aes(x=ferrous_iron, y=percent_cover))+
   geom_bar(stat="identity")
 ## remove na's, invert graph
 
 ggplot(sum_sites, aes(x=as.numeric(flow), y=as.numeric(mean_cover)))+
-  geom_point()
+  geom_point(aes(shape=as.character(condition), color=as.character(analogue)))+
+  geom_smooth(method="lm")+
+  labs(x="Flow Rate", y="Mean Iron Floc Percent Cover", color="Analogue Group", shape="Condition")+
+  coord_cartesian(ylim=c(0, 100))
+
+ggplot(water_quality, aes(x=conductivity, y=ferrous_iron))+
+  geom_point(aes(shape=as.character(condition), color=as.character(analogue)))+
+  geom_smooth(method="lm")+
+  labs(x="Conductivity", y="Dissolved Ferrous Iron", color="Analogue Group", shape="Condition")
+
+ggplot(water_quality, aes(x=conductivity, y=d_o))+
+  geom_point(aes(shape=as.character(condition), color=as.character(analogue)))+
+  geom_smooth(method="lm")+
+  labs(x="Conductivity", y="Dissolved Oxygen (mg/L)", color="Analogue Group", shape="Condition")
 ```
 
 
@@ -132,7 +141,25 @@ How does iron flocculate affect the diversity and abundance of macroinvertebrate
 Plot number of species and number of individuals by percent cover and ferrous iron. Four graphs total. A fifth graph can show the biodiversity number against percent cover/ferrous iron.
 
 ```{r}
-##change the all_sites and prcnt_cvr to be just all_sites, specifically reqrite the prcnt_cvr create code so all_sites gets the piping instead of prcnt_cvr
+ggplot(sum_sites, aes(x=total, y=mean_cover))+
+  geom_point(aes(color=site_name, shape=site_name))+
+  geom_smooth(method="lm")+
+  labs(x="Total Individuals Found", y="Fe Floc Percent Cover", color="Sites", shape="Sites")
+
+ggplot(sum_sites, aes(x=count_taxa, y=mean_cover))+
+  geom_point(aes(color=site_name, shape=site_name))+
+  geom_smooth(method="lm")+
+  labs(x="Unique Species Found", y="Fe Floc Percent Cover", color="Sites", shape="Sites")
+
+ggplot(sum_sites, aes(x=total, y=ferrous_iron))+
+  geom_point(aes(color=site_name, shape=site_name))+
+  geom_smooth(method="lm")+
+  labs(x="Total Individuals Found", y="Dissolved Ferrous Iron (ppm)", color="Sites", shape="Sites")
+
+ggplot(sum_sites, aes(x=count_taxa, y=ferrous_iron))+
+  geom_point(aes(color=site_name, shape=site_name))+
+  geom_smooth(method="lm")+
+  labs(x="Unique Species Found", y="Dissolved Ferrous Iron (ppm)", color="Sites", shape="Sites")
 ```
 
 
@@ -166,7 +193,7 @@ ggplot(all_sites, aes(x=analogue, y=biodiversity, fill=reorder(factor(site_name)
 
 ## Data Along Streams
 
-Testing using a scatterplot to show the water quality levels within a stream with the position on the X axis
+Using a scatterplot to show the water quality levels within a stream with the position on the X axis
 
 ```{r}
 ggplot(water_quality, aes(x=geo_order, y=temp, color=analogue))+
@@ -197,15 +224,28 @@ ggplot(water_quality, aes(x=geo_order, y=conductivity, color=analogue))+
 ggplot(water_quality, aes(x=geo_order, y=turbidity, color=as.character(site_name)))+
          geom_point()+
   geom_line(aes(linetype=as.character(analogue)))+
+  geom_vline(xintercept=c(3.5, 6.5))+
+  scale_x_continuous(breaks=NULL)+
   labs(x="Sequential Data along Streams", y="Turbidity (cm)", color="site_name", linetype="analogue")+
   scale_fill_manual(values=cbPalette)
 # find a way to krump down on the top of the graph to cut off anything above 120cm
+
+ggplot(water_quality, aes(x=transect_number, y=percent_cover, color=as.character(site_name), na.rm=TRUE))+
+  geom_point()+
+  geom_line()+
+  labs(x="Sequential Data along Streams", y="Iron Floc Percent Cover", color="site_name", linetype="analogue")+
+  scale_fill_manual(values=cbPalette)
+# something's going on here, take a look into why the trendline goes by site name for the previous graph but not this one. is it the nas?
+# can I make it such that I have a geom_line(aes(y=percent_cover)) for each individual site name?
+
 # change this so that color maps to the analogue, linetype to analogue, and *the lines are labled with the site names directly on the graph*
 ```
 
-## Scatterplots of WQ data plotted against eachother to identify trendlines
+## Trendline Testing
 
 to make sure na.rm works, check that the applicable variable is being read as numeric (or maybe another type?)
+
+See which of these can be moved to a Question, delete the rest
 
 ```{r}
 ggplot(water_quality, aes(x=d_o, y=`d_o%`))+
@@ -224,6 +264,30 @@ ggplot(water_quality, aes(x=flow_rate, y=as.numeric(percent_cover), na.rm=TRUE))
 # change default colors to cbPalette?
 ```
 
+## Amy's code chunk
+
+```{r}
+barGraphStats <- function(data, variable, byFactorNames) {
+  count <- length(byFactorNames)
+  N <- aggregate(data[[variable]], data[byFactorNames], FUN=length)
+  names(N)[1:count] <- byFactorNames
+  names(N) <- sub("^x$", "N", names(N))
+  mean <- aggregate(data[[variable]], data[byFactorNames], FUN=mean)
+  names(mean)[1:count] <- byFactorNames
+  names(mean) <- sub("^x$", "mean", names(mean))
+  sd <- aggregate(data[[variable]], data[byFactorNames], FUN=sd)
+  names(sd)[1:count] <- byFactorNames
+  names(sd) <- sub("^x$", "sd", names(sd))
+  preSummaryStats <- merge(N, mean, by=byFactorNames)
+  finalSummaryStats <- merge(preSummaryStats, sd, by=byFactorNames)
+  finalSummaryStats$se <- finalSummaryStats$sd / sqrt(finalSummaryStats$N)
+  return(finalSummaryStats)
+  
+  ggplot(data = barGraphStats(data = damage2, variable = "herbivore", byFactorNames = c("Area_type")), aes(x=Area_type, y=mean, fill=Area_type)) +
+   geom_bar(stat='identity', position=position_dodge()) +
+    geom_errorbar(aes(ymin=mean-se, ymax=mean+se), width = 0.2, position = position_dodge(0.9))
+}
+```
 
 
 
