@@ -10,9 +10,6 @@ date: "2024-07-26"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-#### IMPORTANT: FOR 120.1 TURBIDITY MAKE IT GO OFF-SCALE, AND MARK WITH A STAR
-
-Ask Amy about this. There may also still be a problem with the sum_sites cbind, but it may? be fixed?? double check that
 
 ## Adding packages
 
@@ -24,15 +21,29 @@ library(lubridate)
 library(RColorBrewer)
 ```
 
-Amy setwd and upload data
+
+## Statistical analyses
+
 ```{r}
-setwd("C:/Users/amyh/Documents/R_data/2024_internships")
-taxa <- read.csv("Troy_data2.csv")
-water_quality <- read.csv("Troy_data.csv")
+#various packages related to mixed modelling
+library(lme4)
+library(nlme)
+library(lattice)
+library(effects)
+library(emmeans)
+library(car)
+```
+
+
+## Amy setwd and upload data
+
+```{r}
+#setwd("C:/Users/amyh/Documents/R_data/2024_internships")
+#taxa <- read.csv("Troy_data2.csv")
+#water_quality <- read.csv("Troy_data.csv")
 
 
 ```
-
 
 
 ## Datasets, Palettes
@@ -56,7 +67,6 @@ If you are getting errors and the syntax/et are correct, check what type of data
 ```{r}
 str(taxa)
 str(water_quality)
-
 ```
 
 
@@ -80,6 +90,8 @@ sum_sites <- merge(prcnt_cvr, all_sites)
 ```
 
 
+
+
 ## Question 1
 
 Does stream restoration increase the presence of iron flocculate by creating low-flow, acidic, and high iron water conditions compared to unrestored streams?
@@ -92,119 +104,63 @@ AMY: Additional Data manipulation/exploration
 1. Percent Cover in restored/unrestored 
 ```{r}
 #only using "at" plot locations
-#water_quality1 <- water_quality %>%
- # filter(plot_location == "at")
+water_quality1 <- water_quality %>%
+  filter(plot_location == "at")
 
-#water_quality1 <- as.data.frame(water_quality1)
+water_quality1 <- as.data.frame(water_quality1)
 
 #percent cover from non-numeric to numeric
-#water_quality1$percent_cover <- as.numeric(water_quality1$percent_cover)
+water_quality1$percent_cover <- as.numeric(water_quality1$percent_cover)
 
 #BarGraphStats for calculating means
-#barGraphStats <- function(data, variable, byFactorNames) {
-#  count <- length(byFactorNames)
-#  N <- aggregate(data[[variable]], data[byFactorNames], FUN=length)
-#  names(N)[1:count] <- byFactorNames
-#  names(N) <- sub("^x$", "N", names(N))
-#  mean <- aggregate(data[[variable]], data[byFactorNames], FUN=mean)
-#  names(mean)[1:count] <- byFactorNames
-#  names(mean) <- sub("^x$", "mean", names(mean))
-#  sd <- aggregate(data[[variable]], data[byFactorNames], FUN=sd)
-#  names(sd)[1:count] <- byFactorNames
-#  names(sd) <- sub("^x$", "sd", names(sd))
-#  preSummaryStats <- merge(N, mean, by=byFactorNames)
-#  finalSummaryStats <- merge(preSummaryStats, sd, by=byFactorNames)
-#  finalSummaryStats$se <- finalSummaryStats$sd / sqrt(finalSummaryStats$N)
-#  return(finalSummaryStats)
-#}
+barGraphStats <- function(data, variable, byFactorNames) {
+  count <- length(byFactorNames)
+  N <- aggregate(data[[variable]], data[byFactorNames], FUN=length)
+  names(N)[1:count] <- byFactorNames
+  names(N) <- sub("^x$", "N", names(N))
+  mean <- aggregate(data[[variable]], data[byFactorNames], FUN=mean)
+  names(mean)[1:count] <- byFactorNames
+  names(mean) <- sub("^x$", "mean", names(mean))
+  sd <- aggregate(data[[variable]], data[byFactorNames], FUN=sd)
+  names(sd)[1:count] <- byFactorNames
+  names(sd) <- sub("^x$", "sd", names(sd))
+  preSummaryStats <- merge(N, mean, by=byFactorNames)
+  finalSummaryStats <- merge(preSummaryStats, sd, by=byFactorNames)
+  finalSummaryStats$se <- finalSummaryStats$sd / sqrt(finalSummaryStats$N)
+  return(finalSummaryStats)
+}
 
 #ggplot(g1 <- ggplot(data = barGraphStats(data = water_quality1, variable = "percent_cover", byFactorNames = c("site_name")), aes(x=site_name, y=mean)) +
-#    geom_bar(stat='identity', position=position_dodge(), width=0.8) +
-#    geom_errorbar(aes(ymin=mean-se, ymax=mean+se), width = 0.2, position = position_dodge(0.9)) +
-#    annotate("text", x = 1, y = 2.7 , label = "a", size = 8)+
-#    annotate("text", x = 2, y = 2.7 , label = "a", size = 8)+
-#    annotate("text", x = 3, y = 1.75, label = "b", size = 8) +
-#   theme(legend.position = "none") + xlab("Restoration") + ylab("Percent Cover"))
+    #geom_bar(stat='identity', position=position_dodge(), width=0.8) +
+    #geom_errorbar(aes(ymin=mean-se, ymax=mean+se), width = 0.2, position = position_dodge(0.9)) +
+    #annotate("text", x = 1, y = 2.7 , label = "a", size = 8)+
+    #annotate("text", x = 2, y = 2.7 , label = "a", size = 8)+
+    #annotate("text", x = 3, y = 1.75, label = "b", size = 8) +
+   #theme(legend.position = "none") + xlab("Restoration") + ylab("Percent Cover"))
+```
 
 
-
-ggplot(prcnt_cvr, aes(x=factor(site_name), y=factor(mean_cover), fill=factor(condition)))+
-  geom_bar(stat = "identity")+
-  scale_x_discrete(limits = c("j1", "j3", "cc", "ccr", "ar", "hb")) 
+```{r}
+ggplot(sum_sites, aes(x=factor(site_name), y=mean_cover, fill=factor(condition)))+
+  geom_bar(stat="identity")+
+  #geom_text(aes(label=mean_cover), vjust=-1)+
+  scale_x_discrete(limits = c("j1", "j3", "cc", "ccr", "ar", "hb"))+
+  scale_y_continuous(labels=scales::percent, limits=c(0, 1))+
+  labs(x="Site Name", y="Percent Cover", fill="Condition")
  
+ggplot(sum_sites, aes(x=factor(site_name), y=ferrous_iron, fill=factor(condition)))+
+  geom_bar(stat="identity")+
+  #geom_text(aes(label=ferrous_iron), vjust=-1)+
+  scale_x_discrete(limits = c("j1", "j3", "cc", "ccr", "ar", "hb"))+
+  scale_y_continuous(limits=c(0, 15))+
+  labs(x="Site Name", y="Dissolved Ferrous Iron", fill="Condition")
 
-
-```
-
-
-Some statistical analyses
-```{r}
-#various packages related to mixed modelling
-library(lme4)
-library(nlme)
-library(lattice)
-library(effects)
-library(emmeans)
-library(car)
-
-
-
-```
-
-
-The bar graphs are all simple water quality metrics plotted/graphed by their site names. These will either be removed or replaced with scatterplot graphs as I find out which answer Question 1 the most directly, and which are most interesting.
-
-```{r}
-ggplot(water_quality, aes(x=factor(analogue), y=factor(ferrous_iron), fill=factor(site_name)))+
-  geom_col(position="dodge")
-
-ggplot(water_quality, aes(x=factor(analogue), y=factor(percent_cover), fill=factor(site_name)))+
-  geom_col(position="dodge")
-
-ggplot(water_quality, aes(x=site_name, y=ferrous_iron))+
-         geom_bar(stat="identity")
-
-ggplot(water_quality, aes(x=site_name, y=d_o))+
-         geom_bar(stat="identity")
-
-## d_o% goes here, rename it to remove the %
-
-ggplot(water_quality, aes(x=site_name, y=conductivity))+
-         geom_bar(stat="identity")
-
-ggplot(water_quality, aes(x=site_name, y=temp))+
-         geom_bar(stat="identity")
-
-ggplot(water_quality, aes(x=site_name, y=turbidity))+
-         geom_bar(stat="identity")
-
-ggplot(prcnt_cvr, aes(x=site_name, y=mean_cover))+
-         geom_bar(stat="identity")
-
-ggplot(water_quality, aes(x=conductivity, y=flow_rate))+
-  geom_point(aes(shape=as.character(condition), color=as.character(analogue)))+
-  geom_smooth(method="lm")+
-  labs(x="Conductivity", y="Flow Rate", color="Analogue Group", shape="Condition")
-
-ggplot(water_quality, aes(x=ferrous_iron, y=percent_cover))+
-  geom_bar(stat="identity")
-## remove na's, invert graph
-
-ggplot(sum_sites, aes(x=as.numeric(flow), y=as.numeric(mean_cover)))+
-  geom_point(aes(shape=as.character(condition), color=as.character(analogue)))+
-  geom_smooth(method="lm")+
-  labs(x="Flow Rate", y="Mean Iron Floc Percent Cover", color="Analogue Group", shape="Condition")+
-  coord_cartesian(ylim=c(0, 100))
-
-ggplot(water_quality, aes(x=conductivity, y=ferrous_iron))+
-  geom_point(aes(shape=as.character(condition), color=as.character(analogue)))+
-  geom_smooth(method="lm")+
-  labs(x="Conductivity", y="Dissolved Ferrous Iron", color="Analogue Group", shape="Condition")
-
-ggplot(water_quality, aes(x=conductivity, y=d_o))+
-  geom_point(aes(shape=as.character(condition), color=as.character(analogue)))+
-  geom_smooth(method="lm")+
-  labs(x="Conductivity", y="Dissolved Oxygen (mg/L)", color="Analogue Group", shape="Condition")
+ggplot(sum_sites, aes(x=factor(site_name), y=flow, fill=factor(condition)))+
+  geom_bar(stat="identity")+
+  #geom_text(aes(label=mean_cover), vjust=-1)+
+  scale_x_discrete(limits = c("j1", "j3", "cc", "ccr", "ar", "hb"))+
+  #scale_y_continuous(labels=scales::percent, limits=c(0, 1))+
+  labs(x="Site Name", y="Flow Rate (m^3/s)", fill="Condition")
 ```
 
 
@@ -216,24 +172,20 @@ Plot number of species and number of individuals by percent cover and ferrous ir
 
 ```{r}
 ggplot(sum_sites, aes(x=total, y=mean_cover))+
-  geom_point(aes(color=site_name, shape=site_name))+
-  geom_smooth(method="lm")+
-  labs(x="Total Individuals Found", y="Fe Floc Percent Cover", color="Sites", shape="Sites")
+  geom_point(aes(color=condition, shape=site_name), size=3)+
+  scale_y_continuous(limits=c(0, 1), labels=scales::percent)+
+  labs(x="Total Individuals Found", y="Fe Floc Percent Cover", color="Condition", shape="Sites")
 
 ggplot(sum_sites, aes(x=count_taxa, y=mean_cover))+
-  geom_point(aes(color=site_name, shape=site_name))+
-  geom_smooth(method="lm")+
-  labs(x="Unique Species Found", y="Fe Floc Percent Cover", color="Sites", shape="Sites")
+  geom_point(aes(color=condition, shape=site_name), size=3)+
+  scale_y_continuous(limits=c(0, 1), labels=scales::percent)+
+  scale_x_continuous(limits=c(0, 10))+
+  labs(x="Unique Species Found", y="Fe Floc Percent Cover", color="Condition", shape="Sites")
 
-ggplot(sum_sites, aes(x=total, y=ferrous_iron))+
-  geom_point(aes(color=site_name, shape=site_name))+
-  geom_smooth(method="lm")+
-  labs(x="Total Individuals Found", y="Dissolved Ferrous Iron (ppm)", color="Sites", shape="Sites")
-
-ggplot(sum_sites, aes(x=count_taxa, y=ferrous_iron))+
-  geom_point(aes(color=site_name, shape=site_name))+
-  geom_smooth(method="lm")+
-  labs(x="Unique Species Found", y="Dissolved Ferrous Iron (ppm)", color="Sites", shape="Sites")
+ggplot(sum_sites, aes(x=biodiversity, y=mean_cover))+
+  geom_point(aes(color=condition, shape=site_name), size=3)+
+  scale_y_continuous(labels=scales::percent)+
+  labs(x="Biodiversity Ratio", y="Fe Floc Percent Cover", color="Condition", shape="Sites")
 ```
 
 
@@ -244,24 +196,21 @@ Does the effect of iron flocculate on the abundance and diversity of macroinvert
 Plot the biodiversity, #of species, and #of individuals against site names, filled by condition
 
 ```{r}
-ggplot(all_sites, aes(x=analogue, y=count_taxa, fill=reorder(factor(site_name), analogue)))+
-  geom_col(position="dodge")+
-  labs(x="Site Names", y="Unique Species", fill="Analogue")+
-  scale_fill_manual(values=cbPalette)+
-  expand_limits(x=c(1, 3))
+ggplot(sum_sites, aes(x=factor(site_name), y=count_taxa, fill=factor(condition)))+
+  geom_bar(stat="identity")+
+  scale_x_discrete(limits=c("j1", "j3", "cc", "ccr", "ar", "hb"))+
+  labs(x="Site Names", y="Unique Species", fill="Analogue")
 
-ggplot(all_sites, aes(x=analogue, y=total, fill=reorder(factor(site_name), analogue)))+
-  geom_col(position="dodge")+
-  labs(x="Analogue", y="Individuals Found", fill="Site Names")+
-  scale_fill_manual(values=cbPalette)+
-  expand_limits(x=c(1, 3))
+ggplot(sum_sites, aes(x=factor(site_name), y=total, fill=factor(condition)))+
+  geom_bar(stat="identity")+
+  scale_x_discrete(limits=c("j1", "j3", "cc", "ccr", "ar", "hb"))+
+  labs(x="Analogue", y="Individuals Found", fill="Condition")
 
-ggplot(all_sites, aes(x=analogue, y=biodiversity, fill=reorder(factor(site_name), analogue)))+
-  geom_col(position="dodge")+
-  labs(x="Analogue Group", y="Biodiversity (%)", fill="Site Name")+
-  scale_fill_manual(values=cbPalette)+
-  expand_limits(x=c(1, 3), y=c(0, 0.5))+
-  scale_y_continuous(labels=scales::percent)
+ggplot(sum_sites, aes(x=factor(site_name), y=biodiversity, fill=factor(condition)))+
+  geom_bar(stat = "identity")+
+  scale_x_discrete(limits=c("j1", "j3", "cc", "ccr", "ar", "hb"))+
+  scale_y_continuous(labels=scales::percent, limits=c(0, 0.5))+
+  labs(x="Site Names", y="Biodiversity Ratio", fill="Condition")
 ```
 
 
@@ -270,73 +219,36 @@ ggplot(all_sites, aes(x=analogue, y=biodiversity, fill=reorder(factor(site_name)
 Using a scatterplot to show the water quality levels within a stream with the position on the X axis
 
 ```{r}
-ggplot(water_quality, aes(x=geo_order, y=temp, color=analogue))+
-         geom_point()+
-  geom_line(aes(linetype=site_name))+
-  labs(x="Sequential Data along Streams", y="Temperature (C)", color="Site Names", linetype="Site Names")
+#ggplot(water_quality, aes(x=geo_order, y=temp, color=as.factor(analogue)))+
+#         geom_point()+
+#  geom_line(aes(linetype=site_name))+
+#  geom_text()
 
-ggplot(water_quality, aes(x=geo_order, y=ferrous_iron, color=analogue))+
-         geom_point()+
-  geom_line(aes(linetype=site_name))+
-  labs(x="Sequential Data along Streams", y="Dissolved Ferrous Iron (ppm)", color="Site Names", linetype="Site Names")
+#ggplot(water_quality, aes(x=geo_order, y=d_o, color=analogue))+
+#         geom_point()+
+#  geom_line(aes(linetype=site_name))
 
-ggplot(water_quality, aes(x=geo_order, y=d_o, color=analogue))+
-         geom_point()+
-  geom_line(aes(linetype=site_name))+
-  labs(x="Sequential Data along Streams", y="Dissolved Oxygen (mg/L)", color="Site Names", linetype="Site Names")
+#ggplot(water_quality, aes(x=geo_order, y=`d_o%`, color=analogue))+
+#         geom_point()+
+#  geom_line(aes(linetype=site_name))
 
-ggplot(water_quality, aes(x=geo_order, y=`d_o%`, color=analogue))+
-         geom_point()+
-  geom_line(aes(linetype=site_name))+
-  labs(x="Sequential Data along Streams", y="Dissolved Oxygen (%)", color="Site Names", linetype="Site Names")
+#ggplot(water_quality, aes(x=geo_order, y=turbidity, color=as.character(site_name)))+
+#         geom_point()+
+#  geom_line(aes(linetype=as.character(analogue)))+
+#  geom_vline(xintercept=c(3.5, 6.5))+
+#  scale_x_continuous(breaks=NULL)+
+#  labs(x="Sequential Data along Streams", y="Turbidity (cm)", color="site_name", linetype="analogue")+
+#  scale_fill_manual(values=cbPalette)
+## find a way to krump down on the top of the graph to cut off anything above 120cm
 
-ggplot(water_quality, aes(x=geo_order, y=conductivity, color=analogue))+
-         geom_point()+
-  geom_line(aes(linetype=site_name))+
-  labs(x="Sequential Data along Streams", y="Conductivity (uS/cm)", color="Site Names", linetype="Site Names")
+ggplot(water_quality, aes(x=as.character(transect_number), y=percent_cover, color=as.character(site_name), na.rm=TRUE))+
+  geom_point()
 
-ggplot(water_quality, aes(x=geo_order, y=turbidity, color=as.character(site_name)))+
-         geom_point()+
-  geom_line(aes(linetype=as.character(analogue)))+
-  geom_vline(xintercept=c(3.5, 6.5))+
-  scale_x_continuous(breaks=NULL)+
-  labs(x="Sequential Data along Streams", y="Turbidity (cm)", color="site_name", linetype="analogue")+
-  scale_fill_manual(values=cbPalette)
-# find a way to krump down on the top of the graph to cut off anything above 120cm
-
-ggplot(water_quality, aes(x=transect_number, y=percent_cover, color=as.character(site_name), na.rm=TRUE))+
-  geom_point()+
-  geom_line()+
-  labs(x="Sequential Data along Streams", y="Iron Floc Percent Cover", color="site_name", linetype="analogue")+
-  scale_fill_manual(values=cbPalette)
-# something's going on here, take a look into why the trendline goes by site name for the previous graph but not this one. is it the nas?
 # can I make it such that I have a geom_line(aes(y=percent_cover)) for each individual site name?
 
 # change this so that color maps to the analogue, linetype to analogue, and *the lines are labled with the site names directly on the graph*
 ```
 
-## Trendline Testing
-
-to make sure na.rm works, check that the applicable variable is being read as numeric (or maybe another type?)
-
-See which of these can be moved to a Question, delete the rest
-
-```{r}
-ggplot(water_quality, aes(x=d_o, y=`d_o%`))+
-  geom_point()+
-  geom_smooth(method="lm")
-
-ggplot(water_quality, aes(x=ferrous_iron, y=as.numeric(percent_cover), na.rm=TRUE))+
-geom_point()+
-  geom_smooth(method="lm")+
-  labs(x="Dissolved Ferrous Iron (ppm)", y="Iron Floc Percent Cover")+
-  expand_limits(x=c(0, 15)) # why doesn't this work? do i need a whole new function, or do i need to add an as. clause?
-
-ggplot(water_quality, aes(x=flow_rate, y=as.numeric(percent_cover), na.rm=TRUE))+
-  geom_point()+
-  geom_smooth(method="lm")
-# change default colors to cbPalette?
-```
 
 ## Amy's code chunk
 
