@@ -24,6 +24,16 @@ library(lubridate)
 library(RColorBrewer)
 ```
 
+Amy setwd and upload data
+```{r}
+setwd("C:/Users/amyh/Documents/R_data/2024_internships")
+taxa <- read.csv("Troy_data2.csv")
+water_quality <- read.csv("Troy_data.csv")
+
+
+```
+
+
 
 ## Datasets, Palettes
 
@@ -77,6 +87,70 @@ Does stream restoration increase the presence of iron flocculate by creating low
 -flow_rate
 -ferrous-iron
 x-condition
+
+AMY: Additional Data manipulation/exploration
+1. Percent Cover in restored/unrestored 
+```{r}
+#only using "at" plot locations
+#water_quality1 <- water_quality %>%
+ # filter(plot_location == "at")
+
+#water_quality1 <- as.data.frame(water_quality1)
+
+#percent cover from non-numeric to numeric
+#water_quality1$percent_cover <- as.numeric(water_quality1$percent_cover)
+
+#BarGraphStats for calculating means
+#barGraphStats <- function(data, variable, byFactorNames) {
+#  count <- length(byFactorNames)
+#  N <- aggregate(data[[variable]], data[byFactorNames], FUN=length)
+#  names(N)[1:count] <- byFactorNames
+#  names(N) <- sub("^x$", "N", names(N))
+#  mean <- aggregate(data[[variable]], data[byFactorNames], FUN=mean)
+#  names(mean)[1:count] <- byFactorNames
+#  names(mean) <- sub("^x$", "mean", names(mean))
+#  sd <- aggregate(data[[variable]], data[byFactorNames], FUN=sd)
+#  names(sd)[1:count] <- byFactorNames
+#  names(sd) <- sub("^x$", "sd", names(sd))
+#  preSummaryStats <- merge(N, mean, by=byFactorNames)
+#  finalSummaryStats <- merge(preSummaryStats, sd, by=byFactorNames)
+#  finalSummaryStats$se <- finalSummaryStats$sd / sqrt(finalSummaryStats$N)
+#  return(finalSummaryStats)
+#}
+
+#ggplot(g1 <- ggplot(data = barGraphStats(data = water_quality1, variable = "percent_cover", byFactorNames = c("site_name")), aes(x=site_name, y=mean)) +
+#    geom_bar(stat='identity', position=position_dodge(), width=0.8) +
+#    geom_errorbar(aes(ymin=mean-se, ymax=mean+se), width = 0.2, position = position_dodge(0.9)) +
+#    annotate("text", x = 1, y = 2.7 , label = "a", size = 8)+
+#    annotate("text", x = 2, y = 2.7 , label = "a", size = 8)+
+#    annotate("text", x = 3, y = 1.75, label = "b", size = 8) +
+#   theme(legend.position = "none") + xlab("Restoration") + ylab("Percent Cover"))
+
+
+
+ggplot(prcnt_cvr, aes(x=factor(site_name), y=factor(mean_cover), fill=factor(condition)))+
+  geom_bar(stat = "identity")+
+  scale_x_discrete(limits = c("j1", "j3", "cc", "ccr", "ar", "hb")) 
+ 
+
+
+```
+
+
+Some statistical analyses
+```{r}
+#various packages related to mixed modelling
+library(lme4)
+library(nlme)
+library(lattice)
+library(effects)
+library(emmeans)
+library(car)
+
+
+
+```
+
 
 The bar graphs are all simple water quality metrics plotted/graphed by their site names. These will either be removed or replaced with scatterplot graphs as I find out which answer Question 1 the most directly, and which are most interesting.
 
