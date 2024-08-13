@@ -140,6 +140,9 @@ barGraphStats <- function(data, variable, byFactorNames) {
 ```
 
 
+Q1 Graphs
+Percent cover, dissolved iron, and flow rate against site name filled by condition
+
 ```{r}
 ggplot(sum_sites, aes(x=factor(site_name), y=mean_cover, fill=factor(condition)))+
   geom_bar(stat="identity")+
@@ -169,6 +172,7 @@ ggplot(sum_sites, aes(x=factor(site_name), y=flow, fill=factor(condition)))+
 How does iron flocculate affect the diversity and abundance of macroinvertebrates?
 
 Plot number of species and number of individuals by percent cover and ferrous iron. Four graphs total. A fifth graph can show the biodiversity number against percent cover/ferrous iron.
+---Add geom_smooth, but the smooth doesn't show due to scale manipulation. How best to show statistical significance?
 
 ```{r}
 ggplot(sum_sites, aes(x=total, y=mean_cover))+
@@ -219,9 +223,9 @@ ggplot(sum_sites, aes(x=factor(site_name), y=biodiversity, fill=factor(condition
 Using a scatterplot to show the water quality levels within a stream with the position on the X axis
 
 ```{r}
-#ggplot(water_quality, aes(x=geo_order, y=temp, color=as.factor(analogue)))+
-#         geom_point()+
-#  geom_line(aes(linetype=site_name))+
+ggplot(water_quality, aes(x=geo_order, y=temp, color=as.factor(analogue)))+
+         geom_point()+
+  geom_line(aes(linetype=site_name))
 #  geom_text()
 
 #ggplot(water_quality, aes(x=geo_order, y=d_o, color=analogue))+
