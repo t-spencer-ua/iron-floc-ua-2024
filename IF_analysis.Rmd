@@ -10,6 +10,9 @@ date: "2024-07-26"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+## Notes/Changes
+Add the frequency chart to question 2
+
 
 ## Adding packages
 
@@ -41,8 +44,6 @@ library(car)
 #setwd("C:/Users/amyh/Documents/R_data/2024_internships")
 #taxa <- read.csv("Troy_data2.csv")
 #water_quality <- read.csv("Troy_data.csv")
-
-
 ```
 
 
@@ -82,11 +83,16 @@ prcnt_cvr <- water_quality %>%
 ##this created all_sites, if you need to summarize the total number of unique/total number of entries
 all_sites <- taxa %>% group_by(site_name, analogue) %>%
   ##select(site_name, taxa) %>% not necesary, try if there are errors
-  summarize(count_taxa=n_distinct(taxa), total=n()) %>%
-  mutate(biodiversity=count_taxa/total)
-##adds the biodiversity values
+  summarize(count_taxa=n_distinct(taxa), total=n())
 
 sum_sites <- merge(prcnt_cvr, all_sites)
+
+full_data <- taxa %>%
+  inner_join(water_quality1,
+             by=c("site_name"="site_name", "transect_number"="transect_number", "condition"="condition", "date"="date", "analogue"="analogue"),
+             suffix=c("_t", "_wq"))
+
+full_data$location <- paste(full_data$site_name, full_data$transect_number)
 ```
 
 
@@ -169,35 +175,7 @@ ggplot(sum_sites, aes(x=factor(site_name), y=flow, fill=factor(condition)))+
 
 ## Question 2
 
-How does iron flocculate affect the diversity and abundance of macroinvertebrates?
-
-Plot number of species and number of individuals by percent cover and ferrous iron. Four graphs total. A fifth graph can show the biodiversity number against percent cover/ferrous iron.
----Add geom_smooth, but the smooth doesn't show due to scale manipulation. How best to show statistical significance?
-
-```{r}
-ggplot(sum_sites, aes(x=total, y=mean_cover))+
-  geom_point(aes(color=condition, shape=site_name), size=3)+
-  scale_y_continuous(limits=c(0, 1), labels=scales::percent)+
-  labs(x="Total Individuals Found", y="Fe Floc Percent Cover", color="Condition", shape="Sites")
-
-ggplot(sum_sites, aes(x=count_taxa, y=mean_cover))+
-  geom_point(aes(color=condition, shape=site_name), size=3)+
-  scale_y_continuous(limits=c(0, 1), labels=scales::percent)+
-  scale_x_continuous(limits=c(0, 10))+
-  labs(x="Unique Species Found", y="Fe Floc Percent Cover", color="Condition", shape="Sites")
-
-ggplot(sum_sites, aes(x=biodiversity, y=mean_cover))+
-  geom_point(aes(color=condition, shape=site_name), size=3)+
-  scale_y_continuous(labels=scales::percent)+
-  labs(x="Biodiversity Ratio", y="Fe Floc Percent Cover", color="Condition", shape="Sites")
-```
-
-
-## Question 3
-
 Does the effect of iron flocculate on the abundance and diversity of macroinvertebrates depend on if a stream has been restored?
-
-Plot the biodiversity, #of species, and #of individuals against site names, filled by condition
 
 ```{r}
 ggplot(sum_sites, aes(x=factor(site_name), y=count_taxa, fill=factor(condition)))+
@@ -218,39 +196,35 @@ ggplot(sum_sites, aes(x=factor(site_name), y=biodiversity, fill=factor(condition
 ```
 
 
-## Data Along Streams
+## Question 3
 
-Using a scatterplot to show the water quality levels within a stream with the position on the X axis
+How does iron flocculate affect the diversity and abundance of macroinvertebrates?
+
+Plot number of species and number of individuals by percent cover and ferrous iron. Four graphs total. A fifth graph can show the biodiversity number against percent cover/ferrous iron.
+
+---Add geom_smooth, but the smooth doesn't show due to scale manipulation. How best to show statistical significance?
 
 ```{r}
-ggplot(water_quality, aes(x=geo_order, y=temp, color=as.factor(analogue)))+
-         geom_point()+
-  geom_line(aes(linetype=site_name))
-#  geom_text()
+ggplot(sum_sites, aes(x=mean_cover, y=total))+
+  geom_point(aes(color=condition, shape=site_name), size=3)+
+  scale_x_continuous(labels=scales::percent)+
+  labs(x="Fe Floc Percent Cover", y="Total Individuals Found", color="Condition", shape="Sites")
+  
 
-#ggplot(water_quality, aes(x=geo_order, y=d_o, color=analogue))+
-#         geom_point()+
-#  geom_line(aes(linetype=site_name))
+ggplot(sum_sites, aes(x=mean_cover, y=count_taxa))+
+  geom_point(aes(color=condition, shape=site_name), size=3)+
+  scale_y_continuous(limits=c(0, 10))+
+  scale_x_continuous(limits=c(0, 1), labels=scales::percent)+
+  labs(x="Fe Floc Percent Cover", y="Family Richness", color="Condition", shape="Sites")
 
-#ggplot(water_quality, aes(x=geo_order, y=`d_o%`, color=analogue))+
-#         geom_point()+
-#  geom_line(aes(linetype=site_name))
+#ggplot(full_data, aes(x=location, y=n_distinct(taxa), fill=condition))+
+#  geom_col(position="dodge")
 
-#ggplot(water_quality, aes(x=geo_order, y=turbidity, color=as.character(site_name)))+
-#         geom_point()+
-#  geom_line(aes(linetype=as.character(analogue)))+
-#  geom_vline(xintercept=c(3.5, 6.5))+
-#  scale_x_continuous(breaks=NULL)+
-#  labs(x="Sequential Data along Streams", y="Turbidity (cm)", color="site_name", linetype="analogue")+
-#  scale_fill_manual(values=cbPalette)
-## find a way to krump down on the top of the graph to cut off anything above 120cm
-
-ggplot(water_quality, aes(x=as.character(transect_number), y=percent_cover, color=as.character(site_name), na.rm=TRUE))+
-  geom_point()
-
-# can I make it such that I have a geom_line(aes(y=percent_cover)) for each individual site name?
-
-# change this so that color maps to the analogue, linetype to analogue, and *the lines are labled with the site names directly on the graph*
+ggplot(tally(group_by(full_data, location, taxa)),
+       aes(x=reorder(location, -n), y=n, fill=taxa))+
+  geom_bar(stat="identity")+
+  coord_flip()+
+  labs(x="Site Names", y="Family Richness", fill="Taxa")
 ```
 
 
