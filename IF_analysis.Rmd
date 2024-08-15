@@ -36,11 +36,12 @@ library(car)
 
 
 ## Amy setwd and upload data
+You dont need to comment out my code chunks. Just don't run them when you are doing your analyses
 
 ```{r}
-#setwd("C:/Users/amyh/Documents/R_data/2024_internships")
-#taxa <- read.csv("Troy_data2.csv")
-#water_quality <- read.csv("Troy_data.csv")
+setwd("C:/Users/amyh/Documents/R_data/2024_internships")
+taxa <- read.csv("Troy_data2.csv")
+water_quality <- read.csv("Troy_data.csv")
 
 
 ```
@@ -107,7 +108,7 @@ AMY: Additional Data manipulation/exploration
 water_quality1 <- water_quality %>%
   filter(plot_location == "at")
 
-water_quality1 <- as.data.frame(water_quality1)
+#water_quality1 <- as.data.frame(water_quality1)
 
 #percent cover from non-numeric to numeric
 water_quality1$percent_cover <- as.numeric(water_quality1$percent_cover)
@@ -139,6 +140,53 @@ barGraphStats <- function(data, variable, byFactorNames) {
    #theme(legend.position = "none") + xlab("Restoration") + ylab("Percent Cover"))
 ```
 
+
+Preliminary Stats
+```{r}
+#Q1
+
+#### Testing for normality ####
+plot(water_quality1$percent_cover)
+hist(water_quality1$percent_cover)
+shapiro.test(water_quality1$percent_cover)
+#data not normal
+
+#log transform
+water_quality1$percent_cover_log <- log(water_quality1$percent_cover +1)
+shapiro.test(water_quality1$percent_cover_log)
+plot(water_quality1$percent_cover)
+hist(water_quality1$percent_cover)
+#still not normal
+
+#logit transform
+water_quality1$percent_cover_logit <- logit(water_quality1$percent_cover)
+shapiro.test(water_quality1$percent_cover_logit)
+plot(water_quality1$percent_cover_logit)
+hist(water_quality1$percent_cover_logit)
+#still not normal, going to use OG data set for time's sake
+
+
+mod1 <- lm(percent_cover ~ flow_rate*condition*ferrous_iron, data = water_quality1)
+
+summary(mod1)
+anova(mod1)
+
+plot(mod1)
+
+plot(water_quality1$percent_cover ~ water_quality1$flow_rate)
+
+```
+
+Percent Cover vs. Flow rate
+```{r}
+ggplot(water_quality1, aes(x=factor(flow_rate), y=percent_cover, fill=factor(condition)))+
+  geom_point()+
+  scale_color_manual(c("pink", "green"))+
+  labs(x="Flow Rate (m^3/s)", y="Percent Cover of Iron Flocculant", fill="Restored/Unrestored")
+
+
+
+```
 
 Q1 Graphs
 Percent cover, dissolved iron, and flow rate against site name filled by condition
@@ -191,6 +239,37 @@ ggplot(sum_sites, aes(x=biodiversity, y=mean_cover))+
   scale_y_continuous(labels=scales::percent)+
   labs(x="Biodiversity Ratio", y="Fe Floc Percent Cover", color="Condition", shape="Sites")
 ```
+Data manipulation to get count data and join with water quality dataset
+```{r}
+#summarize taxa data to total number of each taxa by site and condition
+taxa2 <- taxa %>% count(taxa, site_name, condition, transect_number)
+
+#combine with water quality data
+join <- water_quality1 %>%
++ full_join(y=taxa2, by = c("site_name", "transect_number"))
+
+richness <- join %>%
+  group_by(site_name, transect_number, percent_cover, condition.x) %>%
+  summarise(richness = n_distinct(taxa))%>%
+  ungroup()
+  
+
+
+
+```
+
+Analysis
+```{r}
+#richness
+mod2 <- lm(richness ~ percent_cover*condition.x, data = richness)
+anova(mod2)
+
+#abundance
+mod3 <- lm(n ~ percent_cover*condition.x*taxa, data = join)
+anova(mod3)
+  
+```
+
 
 
 ## Question 3
@@ -273,7 +352,7 @@ barGraphStats <- function(data, variable, byFactorNames) {
   finalSummaryStats$se <- finalSummaryStats$sd / sqrt(finalSummaryStats$N)
   return(finalSummaryStats)
   
-  ggplot(data = barGraphStats(data = damage2, variable = "herbivore", byFactorNames = c("Area_type")), aes(x=Area_type, y=mean, fill=Area_type)) +
+ggplot(data = barGraphStats(data = damage2, variable = "herbivore", byFactorNames = c("Area_type")), aes(x=Area_type, y=mean, fill=Area_type)) +
    geom_bar(stat='identity', position=position_dodge()) +
     geom_errorbar(aes(ymin=mean-se, ymax=mean+se), width = 0.2, position = position_dodge(0.9))
 }
