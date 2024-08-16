@@ -36,7 +36,6 @@ library(car)
 
 
 ## Amy setwd and upload data
-You dont need to comment out my code chunks. Just don't run them when you are doing your analyses
 
 ```{r}
 setwd("C:/Users/amyh/Documents/R_data/2024_internships")
@@ -183,9 +182,6 @@ ggplot(water_quality1, aes(x=factor(flow_rate), y=percent_cover, fill=factor(con
   geom_point()+
   scale_color_manual(c("pink", "green"))+
   labs(x="Flow Rate (m^3/s)", y="Percent Cover of Iron Flocculant", fill="Restored/Unrestored")
-
-
-
 ```
 
 Q1 Graphs
@@ -212,32 +208,50 @@ ggplot(sum_sites, aes(x=factor(site_name), y=flow, fill=factor(condition)))+
   scale_x_discrete(limits = c("j1", "j3", "cc", "ccr", "ar", "hb"))+
   #scale_y_continuous(labels=scales::percent, limits=c(0, 1))+
   labs(x="Site Name", y="Flow Rate (m^3/s)", fill="Condition")
+
+ggplot(sum_sites, aes(x=flow, y=mean_cover))+
+  geom_point(aes(color=condition, shape=condition), size=4)+
+  geom_smooth(method="lm")+
+  labs(x="Flow Rate", y="Iron Floc Percent Cover", title="Iron Floc as a function of Flow Rate", caption="r-squared=0.57 p=0.04")+
+  theme(legend.direction="horizontal", legend.position="bottom")
+
+ggplot(sum_sites, aes(x=ferrous_iron, y=mean_cover))+
+  geom_point(aes(color=condition, shape=condition), size=4)+
+  geom_smooth(method="lm")+
+  labs(x="Dissolved Ferrous Iron (ppm)", y="Iron Floc Percent Cover", title="Iron Floc as a function of Dissolved Iron")+
+  theme(legend.direction="horizontal", legend.position="bottom")
 ```
 
 
 ## Question 2
 
-How does iron flocculate affect the diversity and abundance of macroinvertebrates?
+How does iron flocculate affect the richness and abundance of macroinvertebrates?
 
 Plot number of species and number of individuals by percent cover and ferrous iron. Four graphs total. A fifth graph can show the biodiversity number against percent cover/ferrous iron.
 ---Add geom_smooth, but the smooth doesn't show due to scale manipulation. How best to show statistical significance?
 
 ```{r}
 ggplot(sum_sites, aes(x=total, y=mean_cover))+
-  geom_point(aes(color=condition, shape=site_name), size=3)+
-  scale_y_continuous(limits=c(0, 1), labels=scales::percent)+
-  labs(x="Total Individuals Found", y="Fe Floc Percent Cover", color="Condition", shape="Sites")
+  geom_point(aes(color=condition, shape=condition), size=3)+
+  geom_smooth(method="lm")+
+  scale_y_continuous(labels=scales::percent, limits=c(0, 1))+
+  labs(title="Abundance as a function of Iron Floc Coverage", x="Abundance", y="Fe Floc Percent Cover", color="Condition", shape="Condition")+
+    theme(legend.direction="horizontal", legend.position="bottom")+
+  coord_flip()
 
-ggplot(sum_sites, aes(x=count_taxa, y=mean_cover))+
-  geom_point(aes(color=condition, shape=site_name), size=3)+
-  scale_y_continuous(limits=c(0, 1), labels=scales::percent)+
-  scale_x_continuous(limits=c(0, 10))+
-  labs(x="Unique Species Found", y="Fe Floc Percent Cover", color="Condition", shape="Sites")
+#ggplot(sum_sites, aes(x=count_taxa, y=mean_cover))+
+#  geom_point(aes(color=condition, shape=site_name), size=3)+
+#  scale_y_continuous(limits=c(0, 1), labels=scales::percent)+
+#  scale_x_continuous(limits=c(0, 10))+
+#  labs(x="Unique Species Found", y="Fe Floc Percent Cover", color="Condition", shape="Sites")
 
 ggplot(sum_sites, aes(x=biodiversity, y=mean_cover))+
-  geom_point(aes(color=condition, shape=site_name), size=3)+
-  scale_y_continuous(labels=scales::percent)+
-  labs(x="Biodiversity Ratio", y="Fe Floc Percent Cover", color="Condition", shape="Sites")
+  geom_point(aes(color=condition, shape=condition), size=3)+
+  geom_smooth(method="lm")+
+  scale_y_continuous(labels=scales::percent, limits=c(0, 1))+
+  labs(title="Species Richness as a function of Iron Floc Coverage", x="Species Richness", y="Fe Floc Percent Cover", color="Condition", shape="Condition")+
+  theme(legend.direction="horizontal", legend.position="bottom")+
+  coord_flip()
 ```
 Data manipulation to get count data and join with water quality dataset
 ```{r}
@@ -252,10 +266,6 @@ richness <- join %>%
   group_by(site_name, transect_number, percent_cover, condition.x) %>%
   summarise(richness = n_distinct(taxa))%>%
   ungroup()
-  
-
-
-
 ```
 
 Analysis
@@ -282,18 +292,14 @@ Plot the biodiversity, #of species, and #of individuals against site names, fill
 ggplot(sum_sites, aes(x=factor(site_name), y=count_taxa, fill=factor(condition)))+
   geom_bar(stat="identity")+
   scale_x_discrete(limits=c("j1", "j3", "cc", "ccr", "ar", "hb"))+
-  labs(x="Site Names", y="Unique Species", fill="Analogue")
+  labs(title="Richness per Site", x="Site Names", y="Species Richness", fill="Condition")+
+  theme(legend.direction="horizontal", legend.position="bottom")
 
 ggplot(sum_sites, aes(x=factor(site_name), y=total, fill=factor(condition)))+
   geom_bar(stat="identity")+
   scale_x_discrete(limits=c("j1", "j3", "cc", "ccr", "ar", "hb"))+
-  labs(x="Analogue", y="Individuals Found", fill="Condition")
-
-ggplot(sum_sites, aes(x=factor(site_name), y=biodiversity, fill=factor(condition)))+
-  geom_bar(stat = "identity")+
-  scale_x_discrete(limits=c("j1", "j3", "cc", "ccr", "ar", "hb"))+
-  scale_y_continuous(labels=scales::percent, limits=c(0, 0.5))+
-  labs(x="Site Names", y="Biodiversity Ratio", fill="Condition")
+  labs(title="Abundance per Site", x="Site Names", y="Abundance", fill="Condition")+
+  theme(legend.direction="horizontal", legend.position="bottom")
 ```
 
 
@@ -302,9 +308,9 @@ ggplot(sum_sites, aes(x=factor(site_name), y=biodiversity, fill=factor(condition
 Using a scatterplot to show the water quality levels within a stream with the position on the X axis
 
 ```{r}
-ggplot(water_quality, aes(x=geo_order, y=temp, color=as.factor(analogue)))+
-         geom_point()+
-  geom_line(aes(linetype=site_name))
+#ggplot(water_quality, aes(x=geo_order, y=temp, color=as.factor(analogue)))+
+#         geom_point()+
+#  geom_line(aes(linetype=site_name))
 #  geom_text()
 
 #ggplot(water_quality, aes(x=geo_order, y=d_o, color=analogue))+
@@ -324,8 +330,8 @@ ggplot(water_quality, aes(x=geo_order, y=temp, color=as.factor(analogue)))+
 #  scale_fill_manual(values=cbPalette)
 ## find a way to krump down on the top of the graph to cut off anything above 120cm
 
-ggplot(water_quality, aes(x=as.character(transect_number), y=percent_cover, color=as.character(site_name), na.rm=TRUE))+
-  geom_point()
+#ggplot(water_quality, aes(x=as.character(transect_number), y=percent_cover, color=as.character(site_name), na.rm=TRUE))+
+#  geom_point()
 
 # can I make it such that I have a geom_line(aes(y=percent_cover)) for each individual site name?
 
