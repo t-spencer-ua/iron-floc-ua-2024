@@ -38,9 +38,9 @@ library(car)
 ## Amy setwd and upload data
 
 ```{r}
-setwd("C:/Users/amyh/Documents/R_data/2024_internships")
-taxa <- read.csv("Troy_data2.csv")
-water_quality <- read.csv("Troy_data.csv")
+# setwd("C:/Users/amyh/Documents/R_data/2024_internships")
+# taxa <- read.csv("Troy_data2.csv")
+# water_quality <- read.csv("Troy_data.csv")
 
 
 ```
@@ -87,6 +87,10 @@ all_sites <- taxa %>% group_by(site_name, analogue) %>%
 ##adds the biodiversity values
 
 sum_sites <- merge(prcnt_cvr, all_sites)
+
+##create one dataframe from two others? need have taxa from the taxa sheet and percent cover form water quality, use transect number to filter the dataset so it lines up correctly
+taxa3 <- merge(taxa, water_quality1)
+#This won't work. I need a dataframe with the abundance of each individual species in a given transect merged with a summary table of the floc cover at each transect
 ```
 
 
@@ -362,6 +366,16 @@ ggplot(data = barGraphStats(data = damage2, variable = "herbivore", byFactorName
    geom_bar(stat='identity', position=position_dodge()) +
     geom_errorbar(aes(ymin=mean-se, ymax=mean+se), width = 0.2, position = position_dodge(0.9))
 }
+```
+
+## Roman's Questions
+Post-project questions
+1. Are some macros found in iron floc more than others?
+x=macro
+
+```{r}
+ggplot(taxa3, aes(x=as.character(taxa), y=percent_cover))+
+  geom_point()
 ```
 
 
