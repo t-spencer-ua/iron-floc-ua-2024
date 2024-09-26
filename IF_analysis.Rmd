@@ -371,11 +371,15 @@ ggplot(data = barGraphStats(data = damage2, variable = "herbivore", byFactorName
 ## Roman's Questions
 Post-project questions
 1. Are some macros found in iron floc more than others?
+macro presence as a function of iron floc coverage
 x=macro
 
 ```{r}
-ggplot(taxa3, aes(x=as.character(taxa), y=percent_cover))+
-  geom_point()
+ggplot(taxa3, aes(x=percent_cover, y=as.character(taxa)))+
+  geom_point()+
+  labs(x="Iron Floc Percent Cover", y="Macroinvertebrate Taxa", title="!Macroinvertebrate Presence as a Function of Iron Floc Coverage")
+  #theme(axis.text.x=element_text(angle=90))+
+  #coord_flip()
 ```
 
 
